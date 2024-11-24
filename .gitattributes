@@ -1,2 +1,290 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horloge, Minuteur et Chronomètre avec Odometer</title>
+
+  <!-- Inclure Odometer.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/odometer/themes/odometer-theme-minimal.css" />
+  <script src="https://cdn.jsdelivr.net/npm/odometer/odometer.min.js"></script>
+
+  <!-- Inclure la police Roboto Black depuis Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+    }
+
+    .container {
+      margin-bottom: 40px;
+    }
+
+    .label {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .clock, .timer, .stopwatch {
+      display: flex;
+      gap: 10px;
+      font-size: 3em;
+    }
+
+    .odometer {
+      width: 4em;
+      height: 4em;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      line-height: 4em;
+      border-radius: 5px;
+      overflow: hidden;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button, input {
+      padding: 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background-color: #444;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #666;
+    }
+
+    input {
+      width: 60px;
+      text-align: center;
+      background-color: #222;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Horloge -->
+  <div class="container">
+    <div class="label">Horloge</div>
+    <div id="clock" class="clock">
+      <div class="odometer" id="clock-hours">00</div> :
+      <div class="odometer" id="clock-minutes">00</div> :
+      <div class="odometer" id="clock-seconds">00</div>
+    </div>
+  </div>
+
+  <!-- Minuteur -->
+  <div class="container">
+    <div class="label">Minuteur</div>
+    <div id="timer" class="clock">
+      <div class="odometer" id="timer-hours">00</div> :
+      <div class="odometer" id="timer-minutes">00</div> :
+      <div class="odometer" id="timer-seconds">00</div>
+    </div>
+    <div class="controls">
+      <input type="number" id="timer-input-hours" placeholder="Heures" min="0" max="23" />
+      <input type="number" id="timer-input-minutes" placeholder="Minutes" min="0" max="59" />
+      <input type="number" id="timer-input-seconds" placeholder="Secondes" min="0" max="59" />
+      <button onclick="startTimer()">Démarrer</button>
+      <button onclick="stopTimer()">Pause</button>
+      <button onclick="resetTimer()">Réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- Chronomètre -->
+  <div class="container">
+    <div class="label">Chronomètre</div>
+    <div id="stopwatch" class="clock">
+      <div class="odometer" id="stopwatch-hours">00</div> :
+      <div class="odometer" id="stopwatch-minutes">00</div> :
+      <div class="odometer" id="stopwatch-seconds">00</div>
+    </div>
+    <div class="controls">
+      <input type="number" id="stopwatch-input-hours" placeholder="Heures" min="0" max="23" />
+      <input type="number" id="stopwatch-input-minutes" placeholder="Minutes" min="0" max="59" />
+      <input type="number" id="stopwatch-input-seconds" placeholder="Secondes" min="0" max="59" />
+      <button onclick="startStopwatch()">Démarrer</button>
+      <button onclick="stopStopwatch()">Pause</button>
+      <button onclick="resetStopwatch()">Réinitialiser</button>
+    </div>
+  </div>
+
+  <script>
+    // Initialisation de l'odometer pour chaque composant
+    let clockHoursOdometer, clockMinutesOdometer, clockSecondsOdometer;
+    let timerHoursOdometer, timerMinutesOdometer, timerSecondsOdometer;
+    let stopwatchHoursOdometer, stopwatchMinutesOdometer, stopwatchSecondsOdometer;
+
+    function initializeOdometers() {
+      clockHoursOdometer = new Odometer({
+        el: document.getElementById('clock-hours'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      clockMinutesOdometer = new Odometer({
+        el: document.getElementById('clock-minutes'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      clockSecondsOdometer = new Odometer({
+        el: document.getElementById('clock-seconds'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+
+      timerHoursOdometer = new Odometer({
+        el: document.getElementById('timer-hours'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      timerMinutesOdometer = new Odometer({
+        el: document.getElementById('timer-minutes'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      timerSecondsOdometer = new Odometer({
+        el: document.getElementById('timer-seconds'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+
+      stopwatchHoursOdometer = new Odometer({
+        el: document.getElementById('stopwatch-hours'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      stopwatchMinutesOdometer = new Odometer({
+        el: document.getElementById('stopwatch-minutes'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+      stopwatchSecondsOdometer = new Odometer({
+        el: document.getElementById('stopwatch-seconds'),
+        value: 0,
+        format: '(00)',
+        animationDuration: 500 // 0.5 sec
+      });
+    }
+
+    // Horloge
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      clockHoursOdometer.update(hours);
+      clockMinutesOdometer.update(minutes);
+      clockSecondsOdometer.update(seconds);
+    }
+
+    // Minuteur
+    let timerTime = 0, timerInterval;
+    function startTimer() {
+      const hours = parseInt(document.getElementById('timer-input-hours').value) || 0;
+      const minutes = parseInt(document.getElementById('timer-input-minutes').value) || 0;
+      const seconds = parseInt(document.getElementById('timer-input-seconds').value) || 0;
+      timerTime = hours * 3600 + minutes * 60 + seconds;
+
+      timerInterval = setInterval(() => {
+        if (timerTime > 0) {
+          timerTime--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+        }
+      }, 1000); // Mise à jour toutes les 1 seconde
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+      stopTimer();
+      timerTime = 0;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const hours = String(Math.floor(timerTime / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((timerTime % 3600) / 60)).padStart(2, '0');
+      const seconds = String(timerTime % 60).padStart(2, '0');
+
+      timerHoursOdometer.update(hours);
+      timerMinutesOdometer.update(minutes);
+      timerSecondsOdometer.update(seconds);
+    }
+
+    // Chronomètre
+    let stopwatchInterval, stopwatchTime = 0;
+    function startStopwatch() {
+      stopStopwatch();
+      const hours = parseInt(document.getElementById('stopwatch-input-hours').value) || 0;
+      const minutes = parseInt(document.getElementById('stopwatch-input-minutes').value) || 0;
+      const seconds = parseInt(document.getElementById('stopwatch-input-seconds').value) || 0;
+      stopwatchTime = hours * 3600 + minutes * 60 + seconds;
+
+      stopwatchInterval = setInterval(() => {
+        stopwatchTime++;
+        updateStopwatchDisplay();
+      }, 1000); // Mise à jour toutes les 1 seconde
+    }
+
+    function stopStopwatch() {
+      clearInterval(stopwatchInterval);
+    }
+
+    function resetStopwatch() {
+      stopStopwatch();
+      stopwatchTime = 0;
+      updateStopwatchDisplay();
+    }
+
+    function updateStopwatchDisplay() {
+      const hours = String(Math.floor(stopwatchTime / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((stopwatchTime % 3600) / 60)).padStart(2, '0');
+      const seconds = String(stopwatchTime % 60).padStart(2, '0');
+
+      stopwatchHoursOdometer.update(hours);
+      stopwatchMinutesOdometer.update(minutes);
+      stopwatchSecondsOdometer.update(seconds);
+    }
+
+    // Initialisation des odometers et démarrage de l'horloge
+    window.onload = function() {
+      initializeOdometers();
+      setInterval(updateClock, 1000); // Mise à jour de l'horloge toutes les 1 seconde
+    };
+  </script>
+
+</body>
+</html>
