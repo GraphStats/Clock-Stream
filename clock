@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Horloge Odometer</title>
@@ -61,7 +61,7 @@
         }
 
         setTimeout(() => {
-            setInterval(mettreAJourHorloge, 500);
+            setInterval(mettreAJourHorloge, 2000);
             mettreAJourHorloge(); // Pour afficher immédiatement l'horloge après les 5 secondes
         }, 5000); // Attendre 5 secondes avant de commencer à mettre à jour l'horloge
     </script>
