@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Horloge Odometer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
+    <IOdometer auto="false" class="iOdometer" :duration="300" :value="f_value" format="d" />
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -16,6 +17,15 @@
             height: 100vh;
             margin: 0;
         }
+
+        .odometer.odometer-animating-up .odometer-ribbon-inner, .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+    -webkit-transition-duration: 0.3s !important;
+    -moz-transition-duration: 0.3s !important;
+    -ms-transition-duration: 0.3s !important;
+    -o-transition-duration: 0.3s !important;
+    transition-duration: 0.3s !important
+    }
+
         .horloge-container {
             font-size: 20em;
             display: flex;
@@ -29,11 +39,11 @@
 </head>
 <body>
     <div class="horloge-container">
-        <div id="horlogeHeures" class="odometer chiffre-espacement">00</div>
+        <div id="horlogeHeures" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
         <div class="separateur">:</div>
-        <div id="horlogeMinutes" class="odometer chiffre-espacement">00</div>
+        <div id="horlogeMinutes" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
         <div class="separateur">:</div>
-        <div id="horlogeSecondes" class="odometer chiffre-espacement">00</div>
+        <div id="horlogeSecondes" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
@@ -56,9 +66,9 @@
         }
 
         setTimeout(() => {
-            setInterval(mettreAJourHorloge, 2000);
+            setInterval(mettreAJourHorloge, 1000);
             mettreAJourHorloge(); // Pour afficher immédiatement l'horloge après les 5 secondes
-        }, 5000); // Attendre 5 secondes avant de commencer à mettre à jour l'horloge
+        }, 0); // Afficher "00:00:00" pendant 5 secondes avant de commencer à mettre à jour l'horloge
     </script>
 </body>
 </html>
