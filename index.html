@@ -5,45 +5,87 @@
     <title>Horloge Odometer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
-    <IOdometer auto="false" class="iOdometer" :duration="300" :value="f_value" format="d" />
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             background-color: black;
             color: white;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
 
-        .odometer.odometer-animating-up .odometer-ribbon-inner, .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-    -webkit-transition-duration: 0.3s !important;
-    -moz-transition-duration: 0.3s !important;
-    -ms-transition-duration: 0.3s !important;
-    -o-transition-duration: 0.3s !important;
-    transition-duration: 0.3s !important
-    }
+        .odometer.odometer-animating-up .odometer-ribbon-inner, 
+        .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+            transition-duration: 0.3s !important;
+        }
 
         .horloge-container {
             font-size: 20em;
             display: flex;
             align-items: center;
         }
+
         .odometer {
             font-weight: 900;
         }
 
+        .select-container {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        select {
+            font-size: 1em;
+            padding: 5px 10px;
+        }
     </style>
 </head>
 <body>
+
+    <div class="select-container">
+        Fuseau horaire : 
+        <select id="gmtSelect">
+            <!-- De GMT-12 à GMT+14 -->
+            <option value="-12">GMT-12</option>
+            <option value="-11">GMT-11</option>
+            <option value="-10">GMT-10</option>
+            <option value="-9">GMT-9</option>
+            <option value="-8">GMT-8</option>
+            <option value="-7">GMT-7</option>
+            <option value="-6">GMT-6</option>
+            <option value="-5">GMT-5</option>
+            <option value="-4">GMT-4</option>
+            <option value="-3">GMT-3</option>
+            <option value="-2">GMT-2</option>
+            <option value="-1">GMT-1</option>
+            <option value="0" selected>GMT+0</option>
+            <option value="1">GMT+1</option>
+            <option value="2">GMT+2</option>
+            <option value="3">GMT+3</option>
+            <option value="4">GMT+4</option>
+            <option value="5">GMT+5</option>
+            <option value="6">GMT+6</option>
+            <option value="7">GMT+7</option>
+            <option value="8">GMT+8</option>
+            <option value="9">GMT+9</option>
+            <option value="10">GMT+10</option>
+            <option value="11">GMT+11</option>
+            <option value="12">GMT+12</option>
+            <option value="13">GMT+13</option>
+            <option value="14">GMT+14</option>
+        </select>
+    </div>
+
     <div class="horloge-container">
-        <div id="horlogeHeures" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
+        <div id="horlogeHeures" class="odometer" data-odometer-format="dd">00</div>
         <div class="separateur">:</div>
-        <div id="horlogeMinutes" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
+        <div id="horlogeMinutes" class="odometer" data-odometer-format="dd">00</div>
         <div class="separateur">:</div>
-        <div id="horlogeSecondes" class="odometer chiffre-espacement" data-odometer-format="dd">00</div>
+        <div id="horlogeSecondes" class="odometer" data-odometer-format="dd">00</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
@@ -51,24 +93,29 @@
         let ancienneHeure = '';
 
         function mettreAJourHorloge() {
+            const gmtOffset = parseInt(document.getElementById('gmtSelect').value, 10);
             const maintenant = new Date();
-            const heuresGMT = maintenant.getUTCHours().toString().padStart(2, '0');
-            const minutesGMT = maintenant.getUTCMinutes().toString().padStart(2, '0');
-            const secondesGMT = maintenant.getUTCSeconds().toString().padStart(2, '0');
-            const nouvelleHeure = `${heuresGMT}:${minutesGMT}:${secondesGMT}`;
+
+            // Convertir en millisecondes et appliquer le décalage GMT
+            const tempsAvecOffset = new Date(maintenant.getTime() + gmtOffset * 3600 * 1000);
+
+            const heures = tempsAvecOffset.getUTCHours().toString().padStart(2, '0');
+            const minutes = tempsAvecOffset.getUTCMinutes().toString().padStart(2, '0');
+            const secondes = tempsAvecOffset.getUTCSeconds().toString().padStart(2, '0');
+            const nouvelleHeure = `${heures}:${minutes}:${secondes}`;
 
             if (nouvelleHeure !== ancienneHeure) {
-                document.getElementById('horlogeHeures').innerText = heuresGMT;
-                document.getElementById('horlogeMinutes').innerText = minutesGMT;
-                document.getElementById('horlogeSecondes').innerText = secondesGMT;
+                document.getElementById('horlogeHeures').innerText = heures;
+                document.getElementById('horlogeMinutes').innerText = minutes;
+                document.getElementById('horlogeSecondes').innerText = secondes;
                 ancienneHeure = nouvelleHeure;
             }
         }
 
-        setTimeout(() => {
-            setInterval(mettreAJourHorloge, 1000);
-            mettreAJourHorloge(); // Pour afficher immédiatement l'horloge après les 5 secondes
-        }, 0); // Afficher "00:00:00" pendant 5 secondes avant de commencer à mettre à jour l'horloge
+        document.getElementById('gmtSelect').addEventListener('change', mettreAJourHorloge);
+
+        setInterval(mettreAJourHorloge, 1000);
+        mettreAJourHorloge(); // Lancer immédiatement
     </script>
 </body>
 </html>
