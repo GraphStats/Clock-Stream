@@ -20,7 +20,7 @@
 
         .odometer.odometer-animating-up .odometer-ribbon-inner, 
         .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-            transition-duration: 0.5s !important;
+            transition-duration: 0.3s !important;
         }
 
         .horloge-container {
@@ -48,7 +48,6 @@
 
     <div class="select-container">
         <select id="gmtSelect">
-            <!-- De GMT-12 à GMT+14 -->
             <option value="-12">GMT-12</option>
             <option value="-11">GMT-11</option>
             <option value="-10">GMT-10</option>
@@ -63,7 +62,7 @@
             <option value="-1">GMT-1</option>
             <option value="0">GMT+0</option>
             <option value="1">GMT+1</option>
-            <option value="2" selected>GMT+2</option>
+            <option value="2">GMT+2</option>
             <option value="3">GMT+3</option>
             <option value="4">GMT+4</option>
             <option value="5">GMT+5</option>
@@ -89,13 +88,18 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
     <script>
+        const selectGMT = document.getElementById('gmtSelect');
         let ancienneHeure = '';
 
-        function mettreAJourHorloge() {
-            const gmtOffset = parseInt(document.getElementById('gmtSelect').value, 10);
-            const maintenant = new Date();
+        // Restaurer le fuseau horaire depuis localStorage s'il existe
+        const gmtSauvegarde = localStorage.getItem('fuseauHoraireGMT');
+        if (gmtSauvegarde !== null) {
+            selectGMT.value = gmtSauvegarde;
+        }
 
-            // Convertir en millisecondes et appliquer le décalage GMT
+        function mettreAJourHorloge() {
+            const gmtOffset = parseInt(selectGMT.value, 10);
+            const maintenant = new Date();
             const tempsAvecOffset = new Date(maintenant.getTime() + gmtOffset * 3600 * 1000);
 
             const heures = tempsAvecOffset.getUTCHours().toString().padStart(2, '0');
@@ -111,7 +115,10 @@
             }
         }
 
-        document.getElementById('gmtSelect').addEventListener('change', mettreAJourHorloge);
+        selectGMT.addEventListener('change', () => {
+            localStorage.setItem('fuseauHoraireGMT', selectGMT.value);
+            mettreAJourHorloge();
+        });
 
         setInterval(mettreAJourHorloge, 1000);
         mettreAJourHorloge(); // Lancer immédiatement
